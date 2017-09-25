@@ -42,6 +42,10 @@ module ResearchMetadataAnnouncement
         uri.sub /^.+\/\//, ''
       end
 
+      def length_constrained?(max_length)
+        max_length && max_length > 0
+      end
+
     end
   end
 end

@@ -16,128 +16,218 @@ module ResearchMetadataAnnouncement
         @resource_extractor = Puree::Extractor::Dataset.new config
       end
 
-      # Dataset transformation
+      # Keywords followed by uri format
       #
       # @param id [String]
       # @param uuid [String]
-      # @param format [ResearchMetadataAnnouncement::Format subclass]
+      # @param max_length [Fixnum]
+      # @param max_descriptors [Fixnum]
       # @return [String, nil] Announcement returned if metadata is available and the announcement length does not exceed the max_length value in format.
-      def transform(id: nil, uuid: nil, format: ResearchMetadataAnnouncement::Format::TitleUri.new)
-        # fallback option if format cannot be honoured (e.g. no or too many keywords)?
-        # space for phrase?
-        @resource = extract uuid: uuid, id: id
-        return nil if !@resource
-
-        @title = @resource.title
-        @uri = @resource.doi if @resource.doi
-        @schemeless_uri = strip_uri_scheme @uri if @uri
-        @keywords = @resource.keywords if !@resource.keywords.empty?
-
-        return nil if !@uri
-
-        result = nil
-
-        # UriTitleKeywords?
-        # UriTitleHashtags?
-        case format
-          when ResearchMetadataAnnouncement::Format::KeywordsUri
-            result = build_keywords_uri(format)
-          when ResearchMetadataAnnouncement::Format::HashtagsUri
-            result = build_hashtags_uri(format)
-          when ResearchMetadataAnnouncement::Format::UriKeywords
-            result = build_uri_keywords(format)
-          when ResearchMetadataAnnouncement::Format::UriHashtags
-            result = build_uri_hashtags(format)
-          when ResearchMetadataAnnouncement::Format::TitleUri
-            result = build_title_uri(format)
-          when ResearchMetadataAnnouncement::Format::UriTitle
-            result = build_uri_title(format)
+      def keywords_uri(id: nil, uuid: nil, max_length: nil, max_descriptors: 2)
+        resource = extract id: id, uuid: uuid
+        return nil if !resource
+        uri = prepare_uri(resource)
+        keywords = resource.keywords
+        if uri && !keywords.empty?
+          return build_keywords_uri(keywords: keywords,
+                                    uri: uri,
+                                    max_length: max_length,
+                                    max_descriptors: max_descriptors)
         end
+        nil
+      end
 
-        result
+      # Uri followed by keywords format
+      #
+      # @param id [String]
+      # @param uuid [String]
+      # @param max_length [Fixnum]
+      # @param max_descriptors [Fixnum]
+      # @return [String, nil] Announcement returned if metadata is available and the announcement length does not exceed the max_length value in format.
+      def uri_keywords(id: nil, uuid: nil, max_length: nil, max_descriptors: 2)
+        resource = extract id: id, uuid: uuid
+        return nil if !resource
+        uri = prepare_uri(resource)
+        keywords = resource.keywords
+        if uri && !keywords.empty?
+          return build_uri_keywords(keywords: keywords,
+                                    uri: uri,
+                                    max_length: max_length,
+                                    max_descriptors: max_descriptors)
+        end
+        nil
+      end
+
+      # Uri followed by hashtags format
+      #
+      # @param id [String]
+      # @param uuid [String]
+      # @param max_length [Fixnum]
+      # @param max_descriptors [Fixnum]
+      # @return [String, nil] Announcement returned if metadata is available and the announcement length does not exceed the max_length value in format.
+      def uri_hashtags(id: nil, uuid: nil, max_length: nil, max_descriptors: 2)
+        resource = extract id: id, uuid: uuid
+        return nil if !resource
+        uri = prepare_uri(resource)
+        keywords = resource.keywords
+        if uri && !keywords.empty?
+          return build_uri_hashtags(keywords: keywords,
+                                    uri: uri,
+                                    max_length: max_length,
+                                    max_descriptors: max_descriptors)
+        end
+        nil
+      end
+
+      # Hashtags followed by uri format
+      #
+      # @param id [String]
+      # @param uuid [String]
+      # @param max_length [Fixnum]
+      # @param max_descriptors [Fixnum]
+      # @return [String, nil] Announcement returned if metadata is available and the announcement length does not exceed the max_length value in format.
+      def hashtags_uri(id: nil, uuid: nil, max_length: nil, max_descriptors: 2)
+        resource = extract id: id, uuid: uuid
+        return nil if !resource
+        uri = prepare_uri(resource)
+        keywords = resource.keywords
+        if uri && !keywords.empty?
+          return build_hashtags_uri(keywords: keywords,
+                                    uri: uri,
+                                    max_length: max_length,
+                                    max_descriptors: max_descriptors)
+        end
+        nil
+      end
+
+      # Title followed by uri format
+      #
+      # @param id [String]
+      # @param uuid [String]
+      # @param max_length [Fixnum]
+      # @return [String, nil] Announcement returned if metadata is available and the announcement length does not exceed the max_length value in format.
+      def title_uri(id: nil, uuid: nil, max_length: nil)
+        resource = extract id: id, uuid: uuid
+        return nil if !resource
+        uri = prepare_uri(resource)
+        if uri
+          return build_title_uri(uri: uri, title: resource.title, max_length: max_length)
+        end
+        nil
+      end
+
+      # Uri followed by title format
+      #
+      # @param id [String]
+      # @param uuid [String]
+      # @param max_length [Fixnum]
+      # @return [String, nil] Announcement returned if metadata is available and the announcement length does not exceed the max_length value in format.
+      def uri_title(id: nil, uuid: nil, max_length: nil)
+        resource = extract id: id, uuid: uuid
+        return nil if !resource
+        uri = prepare_uri(resource)
+        if uri
+          return build_uri_title(uri: uri, title: resource.title, max_length: max_length)
+        end
+        nil
       end
 
       private
 
-      def build_keywords_uri(format)
-        if @keywords
-          str = append_sentence build_keywords(format.max_keywords), @schemeless_uri
-          if format.length_constrained?
-            return str if str.size <= format.max_length
+      def prepare_uri(resource)
+        if resource && resource.doi
+          return strip_uri_scheme resource.doi
+        end
+        nil
+      end
+
+      def build_keywords_uri(keywords:, uri:, max_length:, max_descriptors:)
+        if !keywords.empty?
+          str = append_sentence(build_keywords(keywords, max_descriptors), uri)
+          if length_constrained? max_length
+            return str if str.size <= max_length
+          else
+            return str
           end
         end
         nil
       end
 
-      def build_hashtags_uri(format)
-        if @keywords
-          str = append_sentence build_hashtags(format.max_keywords), @schemeless_uri
-          if format.length_constrained?
-            return str if str.size <= format.max_length
+      def build_uri_keywords(keywords:, uri:, max_length:, max_descriptors:)
+        if !keywords.empty?
+          str = append_sentence(uri, build_keywords(keywords, max_descriptors))
+          if length_constrained? max_length
+            return str if str.size <= max_length
+          else
+            return str
           end
         end
         nil
       end
 
-      def build_uri_keywords(format)
-        if @keywords
-          str = append_sentence @schemeless_uri, build_keywords(format.max_keywords)
-          if format.length_constrained?
-            return str if str.size <= format.max_length
+      def build_uri_hashtags(keywords:, uri:, max_length:, max_descriptors:)
+        if !keywords.empty?
+          str = append_sentence(uri, build_hashtags(keywords, max_descriptors))
+          if length_constrained? max_length
+            return str if str.size <= max_length
+          else
+            return str
           end
         end
         nil
       end
 
-      def build_uri_hashtags(format)
-        if @keywords
-          str = append_sentence @schemeless_uri, build_hashtags(format.max_keywords)
-          if format.length_constrained?
-            return str if str.size <= format.max_length
+      def build_hashtags_uri(keywords:, uri:, max_length:, max_descriptors:)
+        if !keywords.empty?
+          str = append_sentence(build_hashtags(keywords, max_descriptors), uri)
+          if length_constrained? max_length
+            return str if str.size <= max_length
+          else
+            return str
           end
         end
         nil
       end
 
-      def build_title_uri(format)
-        if format.length_constrained?
-          available_chars = format.max_length - (@schemeless_uri.size + 3)
+      def build_title_uri(title:, uri:, max_length:)
+        if length_constrained? max_length
+          available_chars = max_length - (uri.size + 3)
           available_chars = 0 if available_chars < 0
-          if @title.size <= available_chars
-            return append_sentence @title, @schemeless_uri
+          if title.size <= available_chars
+            return append_sentence title, uri
           end
           if available_chars-3 > 0
-            truncated_title = @title[0..available_chars-3].strip + '...'
-            return "#{truncated_title} #{@schemeless_uri}."
+            truncated_title = title[0..available_chars-3].strip + '...'
+            return "#{truncated_title} #{uri}."
           end
         else
-          return append_sentence @title, @schemeless_uri
+          return append_sentence title, uri
         end
       end
 
-      def build_uri_title(format)
-        if format.length_constrained?
-          available_chars = format.max_length - (@schemeless_uri.size + 3)
+      def build_uri_title(uri:, title:, max_length:)
+        if length_constrained? max_length
+          available_chars = max_length - (uri.size + 3)
           available_chars = 0 if available_chars < 0
-          if @title.size <= available_chars
-            return append_sentence @schemeless_uri, @title
+          if title.size <= available_chars
+            return append_sentence uri, title
           end
           if available_chars-3 > 0
-            truncated_title = @title[0..available_chars-3].strip + '...'
-            return "#{@schemeless_uri}. #{truncated_title}"
+            truncated_title = title[0..available_chars-3].strip + '...'
+            return "#{uri}. #{truncated_title}"
           end
         else
-          return append_sentence @schemeless_uri, @title
+          return append_sentence uri, title
         end
       end
 
-      def build_keywords(max)
-        return @keywords[0..max-1].join ', ' if @keywords
+      def build_keywords(keywords, max)
+        return keywords[0..max-1].join ', ' if keywords
         nil
       end
 
-      def build_hashtags(max)
-        a = @keywords[0..max-1].map { |i| i.downcase }
+      def build_hashtags(keywords, max)
+        a = keywords[0..max-1].map { |i| i.downcase }
         a = a.map { |i| i.gsub(/[^a-zA-Z0-9]/,'') }
         a = a.map { |i| i.gsub(/\s+/, '')  }
         a = a.map { |i| "##{i}" }
