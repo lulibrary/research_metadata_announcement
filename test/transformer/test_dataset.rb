@@ -37,42 +37,23 @@ class TestDatasetTransform < Minitest::Test
     end
   end
 
-   def asserts_title_format(format_method)
-    transformer = make_transformer
-    max_length = random_max_length
-    announcement = transformer.send format_method, uuid: random_uuid,
-                                                   max_length: max_length
-    asserts(announcement, max_length)
-  end
+  formats = %i(title_uri uri_title uri_keywords keywords_uri uri_hashtags hashtags_uri)
 
-  def asserts_descriptors_format(format_method)
+  def transform(format)
     transformer = make_transformer
     max_length = random_max_length
     max_descriptors = random_max_descriptors
-    announcement = transformer.send format_method, uuid: random_uuid,
-                                                   max_length: max_length,
-                                                   max_descriptors: max_descriptors
+    transformer.transform uuid: random_uuid,
+                          max_length: max_length,
+                          max_descriptors: max_descriptors
+    announcement = transformer.send format
     asserts(announcement, max_length)
   end
 
-
-
-  title_format_methods = %i(title_uri uri_title)
-  descriptors_format_methods = %i(keywords_uri hashtags_uri uri_keywords uri_hashtags)
-
-  # Title formats
-  title_format_methods.each do |i|
-    test_name = "test_#{i.to_s}_title_format"
+  formats.each do |i|
+    test_name = "test_#{i.to_s}_format"
     define_method(test_name) do
-      asserts_title_format(i)
-    end
-  end
-
-  # Descriptors formats
-  descriptors_format_methods.each do |i|
-    test_name = "test_#{i.to_s}_descriptors_format"
-    define_method(test_name) do
-      asserts_descriptors_format(i)
+      transform i
     end
   end
 

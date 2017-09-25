@@ -52,29 +52,40 @@ Create a metadata transformer for a Pure dataset.
 transformer = ResearchMetadataAnnouncement::Transformer::Dataset.new config
 ```
 
-Give an announcement format method a Pure identifier to get an announcement.
+Give it a Pure identifier and optional announcement format arguments.
+
+```ruby
+transformer.transform uuid: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx',
+                      max_length: 140,
+                      max_descriptors: 3
+```
+
+The announcement is generated (in multiple formats) if the metadata is available and the
+announcement length does not exceed the max_length argument. Announcement formats are
+then available using instance attributes. Each example uses a different dataset for
+illustrative purposes.
 
 ```ruby
 
-transformer.title_uri uuid: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+transformer.title_uri
 #=> "Operating Nanobeams in a Quantum Fluid. dx.doi.org/10.17635/lancaster/researchdata/139."
 
-transformer.title_uri uuid: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx', max_length: 140
+transformer.title_uri
 #=> "Ruthenium Volatilisation from Reprocessed Spent Nuclear Fuel – Studying the Baseline Therm... dx.doi.org/10.17635/lancaster/researchdata/14."
 
-transformer.uri_title uuid: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+transformer.uri_title
 #=> "dx.doi.org/10.17635/lancaster/researchdata/29. Herpes simplex virus 1 (HSV-1) evolution."
 
-transformer.keywords_uri uuid: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+transformer.keywords_uri
 #=> "smart cities, sustainability. dx.doi.org/10.17635/lancaster/researchdata/35."
 
-transformer.hashtags_uri uuid: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+transformer.hashtags_uri
 #=> "#treatedhypertension #microvascularbloodflow. dx.doi.org/10.17635/lancaster/researchdata/148."
 
-transformer.uri_keywords uuid: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+transformer.uri_keywords
 #=> "dx.doi.org/10.17635/lancaster/researchdata/134. metagenomics, deep sequencing."
 
-transformer.uri_hashtags uuid: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx', max_descriptors: 4
+transformer.uri_hashtags
 #=> "dx.doi.org/10.17635/lancaster/researchdata/111. #influenza #nasopharynx #virology #virus."
 
 ```

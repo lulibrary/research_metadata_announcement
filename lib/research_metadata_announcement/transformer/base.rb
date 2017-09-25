@@ -14,15 +14,19 @@ module ResearchMetadataAnnouncement
         @config = config
       end
 
-      private
-
+      # Extract metadata from Pure
+      #
+      # @param id [String]
+      # @param uuid [String]
       def extract(uuid: nil, id: nil)
         if !uuid.nil?
-          return @resource_extractor.find uuid: uuid
+          @resource = @resource_extractor.find uuid: uuid
         else
-          return @resource_extractor.find id: id
+          @resource = @resource_extractor.find id: id
         end
       end
+
+      private
 
       def append_sentence(str, str_to_append)
         if str_to_append && str_to_append.size > 0
