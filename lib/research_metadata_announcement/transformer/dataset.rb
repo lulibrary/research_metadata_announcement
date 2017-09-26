@@ -96,31 +96,30 @@ module ResearchMetadataAnnouncement
         return nil if !@resource
         keywords = @resource.keywords
         uri = prepare_uri
-        if uri
-          case format
-            when :keywords_uri_format
-              return build_keywords_uri(keywords: keywords,
-                                        uri: uri,
-                                        max_length: max_length,
-                                        max_descriptors: max_descriptors)
-            when :uri_keywords_format
-              return build_uri_keywords(keywords: keywords,
-                                        uri: uri,
-                                        max_length: max_length,
-                                        max_descriptors: max_descriptors)
-            when :hashtags_uri_format
-              return build_hashtags_uri(keywords: keywords,
-                                        uri: uri,
-                                        max_length: max_length,
-                                        max_descriptors: max_descriptors)
-            when :uri_hashtags_format
-              return build_uri_hashtags(keywords: keywords,
-                                        uri: uri,
-                                        max_length: max_length,
-                                        max_descriptors: max_descriptors)
-          end
+        return nil if !uri
+        case format
+          when :keywords_uri_format
+            return build_keywords_uri(keywords: keywords,
+                                      uri: uri,
+                                      max_length: max_length,
+                                      max_descriptors: max_descriptors)
+          when :uri_keywords_format
+            return build_uri_keywords(keywords: keywords,
+                                      uri: uri,
+                                      max_length: max_length,
+                                      max_descriptors: max_descriptors)
+          when :hashtags_uri_format
+            return build_hashtags_uri(keywords: keywords,
+                                      uri: uri,
+                                      max_length: max_length,
+                                      max_descriptors: max_descriptors)
+          when :uri_hashtags_format
+            return build_uri_hashtags(keywords: keywords,
+                                      uri: uri,
+                                      max_length: max_length,
+                                      max_descriptors: max_descriptors)
         end
-        nil
+      end
       end
 
       def prepare_uri
