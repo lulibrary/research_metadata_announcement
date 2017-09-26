@@ -120,7 +120,6 @@ module ResearchMetadataAnnouncement
                                       max_descriptors: max_descriptors)
         end
       end
-      end
 
       def prepare_uri
         if @resource && @resource.doi
