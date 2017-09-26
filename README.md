@@ -52,25 +52,22 @@ Create a metadata transformer for a Pure dataset.
 transformer = ResearchMetadataAnnouncement::Transformer::Dataset.new config
 ```
 
-Give it a Pure identifier and optional announcement format arguments.
+Give it a Pure identifier and extract the metadata.
 
 ```ruby
-transformer.transform uuid: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx',
-                      max_length: 140,
-                      max_descriptors: 3
+transformer.extract uuid: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
 ```
 
-The announcement is generated (in multiple formats) if the metadata is available and the
-announcement length does not exceed the max_length argument. Announcement formats are
-then available using instance attributes. Each example uses a different dataset for
-illustrative purposes.
+Announcements can be obtained in various formats, assuming the metadata is
+available and the announcement length does not exceed the optional max_length
+argument. Each example uses a different dataset for illustrative purposes.
 
 ```ruby
 
 transformer.title_uri
 #=> "Operating Nanobeams in a Quantum Fluid. dx.doi.org/10.17635/lancaster/researchdata/139."
 
-transformer.title_uri
+transformer.title_uri max_length: 140
 #=> "Ruthenium Volatilisation from Reprocessed Spent Nuclear Fuel – Studying the Baseline Therm... dx.doi.org/10.17635/lancaster/researchdata/14."
 
 transformer.uri_title
@@ -85,7 +82,7 @@ transformer.hashtags_uri
 transformer.uri_keywords
 #=> "dx.doi.org/10.17635/lancaster/researchdata/134. metagenomics, deep sequencing."
 
-transformer.uri_hashtags
+transformer.uri_hashtags max_descriptors: 4
 #=> "dx.doi.org/10.17635/lancaster/researchdata/111. #influenza #nasopharynx #virology #virus."
 
 ```

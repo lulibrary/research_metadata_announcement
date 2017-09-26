@@ -14,7 +14,7 @@ module ResearchMetadataAnnouncement
         @config = config
       end
 
-      # Extract metadata from Pure
+      # Extract metadata from Pure.
       #
       # @param id [String]
       # @param uuid [String]
@@ -52,4 +52,5 @@ module ResearchMetadataAnnouncement
 
     end
   end
+
 end

@@ -37,24 +37,32 @@ class TestDatasetTransform < Minitest::Test
     end
   end
 
-  formats = %i(title_uri uri_title uri_keywords keywords_uri uri_hashtags hashtags_uri)
+  title_formats = %i(title_uri uri_title)
+  descriptors_formats = %i(uri_keywords keywords_uri uri_hashtags hashtags_uri)
 
-  def transform(format)
-    transformer = make_transformer
-    max_length = random_max_length
-    max_descriptors = random_max_descriptors
-    transformer.transform uuid: random_uuid,
-                          max_length: max_length,
-                          max_descriptors: max_descriptors
-    announcement = transformer.send format
-    asserts(announcement, max_length)
-  end
-
-  formats.each do |i|
+  title_formats.each do |i|
     test_name = "test_#{i.to_s}_format"
     define_method(test_name) do
-      transform i
+      transformer = make_transformer
+      max_length = random_max_length
+      transformer.extract uuid: random_uuid
+      announcement = transformer.send i, max_length: max_length
+      asserts(announcement, max_length)
     end
   end
+
+  descriptors_formats.each do |i|
+    test_name = "test_#{i.to_s}_format"
+    define_method(test_name) do
+      transformer = make_transformer
+      max_length = random_max_length
+      max_descriptors = random_max_descriptors
+      transformer.extract uuid: random_uuid
+      announcement = transformer.send i, max_length: max_length,
+                                         max_descriptors: max_descriptors
+      asserts(announcement, max_length)
+    end
+  end
+
 
 end

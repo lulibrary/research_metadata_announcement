@@ -7,24 +7,6 @@ module ResearchMetadataAnnouncement
     #
     class Dataset < ResearchMetadataAnnouncement::Transformer::Base
 
-      # @return [String] Title followed by uri format.
-      attr_reader :title_uri
-
-      # @return [String] Uri followed by title format.
-      attr_reader :uri_title
-
-      # @return [String] Keywords followed by uri format.
-      attr_reader :keywords_uri
-
-      # @return [String] Hashtags followed by uri format.
-      attr_reader :hashtags_uri
-
-      # @return [String] Uri followed by keywords format.
-      attr_reader :uri_keywords
-
-      # @return [String] Uri followed by hashtags format.
-      attr_reader :uri_hashtags
-
       # @param config [Hash]
       # @option config [String] :url The URL of the Pure host.
       # @option config [String] :username The username of the Pure host account.
@@ -34,53 +16,36 @@ module ResearchMetadataAnnouncement
         @resource_extractor = Puree::Extractor::Dataset.new config
       end
 
-      # Preprocessing of all announcement formats.
-      #
-      # @param max_length [Fixnum] Maximum length of announcement.
-      # @param max_descriptors [Fixnum] Maximum number of descriptors, the common name for both keywords and hashtags.
-      def transform(uuid: nil, id: nil, max_length: nil, max_descriptors: 2)
-        extract uuid: uuid, id: id
-        return if !@resource
-        @uri = prepare_uri
-        @title_uri = prepare_title_uri max_length: max_length
-        @uri_title = prepare_uri_title max_length: max_length
-        @keywords_uri = prepare_keywords_uri max_length: max_length, max_descriptors: max_descriptors
-        @uri_keywords = prepare_uri_keywords max_length: max_length, max_descriptors: max_descriptors
-        @uri_hashtags = prepare_uri_hashtags max_length: max_length, max_descriptors: max_descriptors
-        @hashtags_uri = prepare_hashtags_uri max_length: max_length, max_descriptors: max_descriptors
-        return
-      end
-
-
-      private
-
       # Keywords followed by uri format
       #
       # @param max_length [Fixnum]
       # @param max_descriptors [Fixnum]
-      # @return [String, nil] Announcement returned if metadata is available and the announcement length does not exceed the max_length value in format.
-      def prepare_keywords_uri(max_length:, max_descriptors:)
+      # @return [String, nil] Announcement returned if the metadata is available and the announcement length does not exceed the max_length argument.
+      def keywords_uri(max_length: nil, max_descriptors: 2)
         return nil if !@resource
         keywords = @resource.keywords
-        if @uri && !keywords.empty?
+        uri = prepare_uri
+        if uri
           return build_keywords_uri(keywords: keywords,
-                                    uri: @uri,
+                                    uri: uri,
                                     max_length: max_length,
                                     max_descriptors: max_descriptors)
         end
+        nil
       end
 
       # Uri followed by keywords format
       #
       # @param max_length [Fixnum]
       # @param max_descriptors [Fixnum]
-      # @return [String, nil] Announcement returned if metadata is available and the announcement length does not exceed the max_length value in format.
-      def prepare_uri_keywords(max_length: nil, max_descriptors: 2)
+      # @return [String, nil] Announcement returned if the metadata is available and the announcement length does not exceed the max_length argument.
+      def uri_keywords(max_length: nil, max_descriptors: 2)
         return nil if !@resource
         keywords = @resource.keywords
-        if @uri && !keywords.empty?
+        uri = prepare_uri
+        if uri
           return build_uri_keywords(keywords: keywords,
-                                    uri: @uri,
+                                    uri: uri,
                                     max_length: max_length,
                                     max_descriptors: max_descriptors)
         end
@@ -91,13 +56,14 @@ module ResearchMetadataAnnouncement
       #
       # @param max_length [Fixnum]
       # @param max_descriptors [Fixnum]
-      # @return [String, nil] Announcement returned if metadata is available and the announcement length does not exceed the max_length value in format.
-      def prepare_uri_hashtags(max_length: nil, max_descriptors: 2)
+      # @return [String, nil] Announcement returned if the metadata is available and the announcement length does not exceed the max_length argument.
+      def uri_hashtags(max_length: nil, max_descriptors: 2)
         return nil if !@resource
         keywords = @resource.keywords
-        if @uri && !keywords.empty?
+        uri = prepare_uri
+        if uri
           return build_uri_hashtags(keywords: keywords,
-                                    uri: @uri,
+                                    uri: uri,
                                     max_length: max_length,
                                     max_descriptors: max_descriptors)
         end
@@ -108,13 +74,14 @@ module ResearchMetadataAnnouncement
       #
       # @param max_length [Fixnum]
       # @param max_descriptors [Fixnum]
-      # @return [String, nil] Announcement returned if metadata is available and the announcement length does not exceed the max_length value in format.
-      def prepare_hashtags_uri(max_length: nil, max_descriptors: 2)
+      # @return [String, nil] Announcement returned if the metadata is available and the announcement length does not exceed the max_length argument.
+      def hashtags_uri(max_length: nil, max_descriptors: 2)
         return nil if !@resource
         keywords = @resource.keywords
-        if @uri && !keywords.empty?
+        uri = prepare_uri
+        if uri
           return build_hashtags_uri(keywords: keywords,
-                                    uri: @uri,
+                                    uri: uri,
                                     max_length: max_length,
                                     max_descriptors: max_descriptors)
         end
@@ -124,12 +91,13 @@ module ResearchMetadataAnnouncement
       # Title followed by uri format
       #
       # @param max_length [Fixnum]
-      # @return [String, nil] Announcement returned if metadata is available and the announcement length does not exceed the max_length value in format.
-      def prepare_title_uri(max_length: nil)
+      # @return [String, nil] Announcement returned if the metadata is available and the announcement length does not exceed the max_length argument.
+      def title_uri(max_length: nil)
         return nil if !@resource
         title = @resource.title
-        if @uri
-          return build_title_uri(uri: @uri, title: title, max_length: max_length)
+        uri = prepare_uri
+        if uri
+          return build_title_uri(uri: uri, title: title, max_length: max_length)
         end
         nil
       end
@@ -137,15 +105,18 @@ module ResearchMetadataAnnouncement
       # Uri followed by title format
       #
       # @param max_length [Fixnum]
-      # @return [String, nil] Announcement returned if metadata is available and the announcement length does not exceed the max_length value in format.
-      def prepare_uri_title(max_length: nil)
+      # @return [String, nil] Announcement returned if the metadata is available and the announcement length does not exceed the max_length argument.
+      def uri_title(max_length: nil)
         return nil if !@resource
         title = @resource.title
-        if @uri
-          return build_uri_title(uri: @uri, title: title, max_length: max_length)
+        uri = prepare_uri
+        if uri
+          return build_uri_title(uri: uri, title: title, max_length: max_length)
         end
         nil
       end
+
+      private
 
       def prepare_uri
         if @resource && @resource.doi
