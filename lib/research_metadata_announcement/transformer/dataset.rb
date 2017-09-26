@@ -16,72 +16,6 @@ module ResearchMetadataAnnouncement
         @resource_extractor = Puree::Extractor::Dataset.new config
       end
 
-      # Keywords followed by uri format
-      #
-      # @param max_length [Fixnum] Maximum length of announcement.
-      # @param max_descriptors [Fixnum] Maximum number of descriptors (common name for keywords, tags, hashtags).
-      # @return [String, nil] Announcement returned if the metadata is available and the announcement length does not exceed the max_length argument.
-      def keywords_uri(max_length: nil, max_descriptors: 2)
-        return nil if !@resource
-        keywords = @resource.keywords
-        uri = prepare_uri
-        if uri
-          return build_keywords_uri(keywords: keywords,
-                                    uri: uri,
-                                    max_length: max_length,
-                                    max_descriptors: max_descriptors)
-        end
-        nil
-      end
-
-      # Uri followed by keywords format
-      #
-      # @see #keywords_uri
-      def uri_keywords(max_length: nil, max_descriptors: 2)
-        return nil if !@resource
-        keywords = @resource.keywords
-        uri = prepare_uri
-        if uri
-          return build_uri_keywords(keywords: keywords,
-                                    uri: uri,
-                                    max_length: max_length,
-                                    max_descriptors: max_descriptors)
-        end
-        nil
-      end
-
-      # Uri followed by hashtags format
-      #
-      # @see #keywords_uri
-      def uri_hashtags(max_length: nil, max_descriptors: 2)
-        return nil if !@resource
-        keywords = @resource.keywords
-        uri = prepare_uri
-        if uri
-          return build_uri_hashtags(keywords: keywords,
-                                    uri: uri,
-                                    max_length: max_length,
-                                    max_descriptors: max_descriptors)
-        end
-        nil
-      end
-
-      # Hashtags followed by uri format
-      #
-      # @see #keywords_uri
-      def hashtags_uri(max_length: nil, max_descriptors: 2)
-        return nil if !@resource
-        keywords = @resource.keywords
-        uri = prepare_uri
-        if uri
-          return build_hashtags_uri(keywords: keywords,
-                                    uri: uri,
-                                    max_length: max_length,
-                                    max_descriptors: max_descriptors)
-        end
-        nil
-      end
-
       # Title followed by uri format
       #
       # @param max_length [Fixnum]
@@ -99,9 +33,47 @@ module ResearchMetadataAnnouncement
                       max_length: max_length
       end
 
+      # Keywords followed by uri format
+      #
+      # @param max_length [Fixnum] Maximum length of announcement.
+      # @param max_descriptors [Fixnum] Maximum number of descriptors (common name for keywords, tags, hashtags).
+      # @return [String, nil] Announcement returned if the metadata is available and the announcement length does not exceed the max_length argument.
+      def keywords_uri(max_length: nil, max_descriptors: 2)
+        descriptors_formats format: :keywords_uri_format,
+                            max_length: max_length,
+                            max_descriptors: max_descriptors
+      end
+
+      # Uri followed by keywords format
+      #
+      # @see #keywords_uri
+      def uri_keywords(max_length: nil, max_descriptors: 2)
+        descriptors_formats format: :uri_keywords_format,
+                            max_length: max_length,
+                            max_descriptors: max_descriptors
+      end
+
+      # Hashtags followed by uri format
+      #
+      # @see #keywords_uri
+      def hashtags_uri(max_length: nil, max_descriptors: 2)
+        descriptors_formats format: :hashtags_uri_format,
+                            max_length: max_length,
+                            max_descriptors: max_descriptors
+      end
+
+      # Uri followed by hashtags format
+      #
+      # @see #keywords_uri
+      def uri_hashtags(max_length: nil, max_descriptors: 2)
+        descriptors_formats format: :uri_hashtags_format,
+                            max_length: max_length,
+                            max_descriptors: max_descriptors
+      end
+
       private
 
-      def title_formats(format:, max_length: nil)
+      def title_formats(format:, max_length:)
         return nil if !@resource
         uri = prepare_uri
         title = @resource.title
@@ -115,6 +87,37 @@ module ResearchMetadataAnnouncement
               return build_uri_title(uri: uri,
                                      title: title,
                                      max_length: max_length)
+          end
+        end
+        nil
+      end
+
+      def descriptors_formats(format:, max_length:, max_descriptors:)
+        return nil if !@resource
+        keywords = @resource.keywords
+        uri = prepare_uri
+        if uri
+          case format
+            when :keywords_uri_format
+              return build_keywords_uri(keywords: keywords,
+                                        uri: uri,
+                                        max_length: max_length,
+                                        max_descriptors: max_descriptors)
+            when :uri_keywords_format
+              return build_uri_keywords(keywords: keywords,
+                                        uri: uri,
+                                        max_length: max_length,
+                                        max_descriptors: max_descriptors)
+            when :hashtags_uri_format
+              return build_hashtags_uri(keywords: keywords,
+                                        uri: uri,
+                                        max_length: max_length,
+                                        max_descriptors: max_descriptors)
+            when :uri_hashtags_format
+              return build_uri_hashtags(keywords: keywords,
+                                        uri: uri,
+                                        max_length: max_length,
+                                        max_descriptors: max_descriptors)
           end
         end
         nil
