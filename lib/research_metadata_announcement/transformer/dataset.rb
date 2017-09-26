@@ -99,31 +99,56 @@ module ResearchMetadataAnnouncement
         return nil if !uri
         case format
           when :keywords_uri_format
-            return build_keywords_uri(keywords: keywords,
-                                      uri: uri,
-                                      max_length: max_length,
-                                      max_descriptors: max_descriptors)
+            return build_descriptors_formats(format: :keywords_uri_format,
+                                             keywords: keywords,
+                                             uri: uri,
+                                             max_length: max_length,
+                                             max_descriptors: max_descriptors)
           when :uri_keywords_format
-            return build_uri_keywords(keywords: keywords,
-                                      uri: uri,
-                                      max_length: max_length,
-                                      max_descriptors: max_descriptors)
+            return build_descriptors_formats(format: :uri_keywords_format,
+                                             keywords: keywords,
+                                             uri: uri,
+                                             max_length: max_length,
+                                             max_descriptors: max_descriptors)
           when :hashtags_uri_format
-            return build_hashtags_uri(keywords: keywords,
-                                      uri: uri,
-                                      max_length: max_length,
-                                      max_descriptors: max_descriptors)
+            return build_descriptors_formats(format: :hashtags_uri_format,
+                                             keywords: keywords,
+                                             uri: uri,
+                                             max_length: max_length,
+                                             max_descriptors: max_descriptors)
           when :uri_hashtags_format
-            return build_uri_hashtags(keywords: keywords,
-                                      uri: uri,
-                                      max_length: max_length,
-                                      max_descriptors: max_descriptors)
+            return build_descriptors_formats(format: :uri_hashtags_format,
+                                             keywords: keywords,
+                                             uri: uri,
+                                             max_length: max_length,
+                                             max_descriptors: max_descriptors)
         end
       end
 
       def prepare_uri
         if @resource && @resource.doi
           return strip_uri_scheme @resource.doi
+        end
+        nil
+      end
+
+      def build_descriptors_formats(format:, keywords:, uri:, max_length:, max_descriptors:)
+        if !keywords.empty?
+          case format
+            when :keywords_uri_format
+              str = append_sentence(build_keywords(keywords, max_descriptors), uri)
+            when :uri_keywords_format
+              str = append_sentence(uri, build_keywords(keywords, max_descriptors))
+            when :hashtags_uri_format
+              str = append_sentence(build_hashtags(keywords, max_descriptors), uri)
+            when :uri_hashtags_format
+              str = append_sentence(uri, build_hashtags(keywords, max_descriptors))
+          end
+          if length_constrained? max_length
+            return str if str.size <= max_length
+          else
+            return str
+          end
         end
         nil
       end
