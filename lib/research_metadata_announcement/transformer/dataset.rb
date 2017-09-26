@@ -76,27 +76,27 @@ module ResearchMetadataAnnouncement
       def title_formats(format:, max_length:)
         return nil if !@resource
         uri = prepare_uri
+        return nil if !uri
         title = @resource.title
-        if uri
-          case format
-            when :title_uri_format
-              return build_title_uri(uri: uri,
-                                     title: title,
-                                     max_length: max_length)
-            when :uri_title_format
-              return build_uri_title(uri: uri,
-                                     title: title,
-                                     max_length: max_length)
-          end
+        case format
+          when :title_uri_format
+            return build_title_formats(format: :title_uri_format,
+                                       uri: uri,
+                                       title: title,
+                                       max_length: max_length)
+          when :uri_title_format
+            return build_title_formats(format: :uri_title_format,
+                                       uri: uri,
+                                       title: title,
+                                       max_length: max_length)
         end
-        nil
       end
 
       def descriptors_formats(format:, max_length:, max_descriptors:)
         return nil if !@resource
-        keywords = @resource.keywords
         uri = prepare_uri
         return nil if !uri
+        keywords = @resource.keywords
         case format
           when :keywords_uri_format
             return build_descriptors_formats(format: :keywords_uri_format,
@@ -151,35 +151,34 @@ module ResearchMetadataAnnouncement
         end
       end
 
-      def build_title_uri(title:, uri:, max_length:)
+      def build_title_formats(format:, title:, uri:, max_length:)
         if length_constrained? max_length
           available_chars = max_length - (uri.size + 3)
           available_chars = 0 if available_chars < 0
           if title.size <= available_chars
-            return append_sentence title, uri
+            case format
+              when :title_uri_format
+                return append_sentence title, uri
+              when :uri_title_format
+                return append_sentence uri, title
+            end
           end
           if available_chars-3 > 0
             truncated_title = title[0..available_chars-3].strip + '...'
-            return "#{truncated_title} #{uri}."
+            case format
+              when :title_uri_format
+                return "#{truncated_title} #{uri}."
+              when :uri_title_format
+                return "#{uri}. #{truncated_title}"
+            end
           end
         else
-          return append_sentence title, uri
-        end
-      end
-
-      def build_uri_title(uri:, title:, max_length:)
-        if length_constrained? max_length
-          available_chars = max_length - (uri.size + 3)
-          available_chars = 0 if available_chars < 0
-          if title.size <= available_chars
-            return append_sentence uri, title
+          case format
+            when :title_uri_format
+              return append_sentence title, uri
+            when :uri_title_format
+              return append_sentence uri, title
           end
-          if available_chars-3 > 0
-            truncated_title = title[0..available_chars-3].strip + '...'
-            return "#{uri}. #{truncated_title}"
-          end
-        else
-          return append_sentence uri, title
         end
       end
 
