@@ -18,8 +18,8 @@ module ResearchMetadataAnnouncement
 
       # Keywords followed by uri format
       #
-      # @param max_length [Fixnum]
-      # @param max_descriptors [Fixnum]
+      # @param max_length [Fixnum] Maximum length of announcement.
+      # @param max_descriptors [Fixnum] Maximum number of descriptors (common name for keywords, tags, hashtags).
       # @return [String, nil] Announcement returned if the metadata is available and the announcement length does not exceed the max_length argument.
       def keywords_uri(max_length: nil, max_descriptors: 2)
         return nil if !@resource
@@ -36,9 +36,7 @@ module ResearchMetadataAnnouncement
 
       # Uri followed by keywords format
       #
-      # @param max_length [Fixnum]
-      # @param max_descriptors [Fixnum]
-      # @return [String, nil] Announcement returned if the metadata is available and the announcement length does not exceed the max_length argument.
+      # @see #keywords_uri
       def uri_keywords(max_length: nil, max_descriptors: 2)
         return nil if !@resource
         keywords = @resource.keywords
@@ -54,9 +52,7 @@ module ResearchMetadataAnnouncement
 
       # Uri followed by hashtags format
       #
-      # @param max_length [Fixnum]
-      # @param max_descriptors [Fixnum]
-      # @return [String, nil] Announcement returned if the metadata is available and the announcement length does not exceed the max_length argument.
+      # @see #keywords_uri
       def uri_hashtags(max_length: nil, max_descriptors: 2)
         return nil if !@resource
         keywords = @resource.keywords
@@ -72,9 +68,7 @@ module ResearchMetadataAnnouncement
 
       # Hashtags followed by uri format
       #
-      # @param max_length [Fixnum]
-      # @param max_descriptors [Fixnum]
-      # @return [String, nil] Announcement returned if the metadata is available and the announcement length does not exceed the max_length argument.
+      # @see #keywords_uri
       def hashtags_uri(max_length: nil, max_descriptors: 2)
         return nil if !@resource
         keywords = @resource.keywords
@@ -104,8 +98,7 @@ module ResearchMetadataAnnouncement
 
       # Uri followed by title format
       #
-      # @param max_length [Fixnum]
-      # @return [String, nil] Announcement returned if the metadata is available and the announcement length does not exceed the max_length argument.
+      # @see #title_uri
       def uri_title(max_length: nil)
         return nil if !@resource
         title = @resource.title
