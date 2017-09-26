@@ -52,56 +52,38 @@ Create a metadata transformer for a Pure dataset.
 transformer = ResearchMetadataAnnouncement::Transformer::Dataset.new config
 ```
 
-Give it a Pure identifier (with optional announcement format)...
+Give it a Pure identifier and extract the metadata.
 
 ```ruby
-format = ResearchMetadataAnnouncement::Format::UriHashtags.new(max_length: 140, max_keywords: 3)
-transformer.transform(uuid: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx', format: format)
+transformer.extract uuid: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
 ```
 
-...and get an announcement.
-
-### Formats
-
-#### ResearchMetadataAnnouncement::Format::TitleUri (default)
+Announcements can be obtained in various formats, assuming the metadata is
+available and the announcement length does not exceed the optional max_length
+argument. Each example uses a different dataset for illustrative purposes.
 
 ```ruby
+
+transformer.title_uri
 #=> "Operating Nanobeams in a Quantum Fluid. dx.doi.org/10.17635/lancaster/researchdata/139."
-```
 
- Truncated title due to max_length value in format.
-
-```ruby
+transformer.title_uri max_length: 140
 #=> "Ruthenium Volatilisation from Reprocessed Spent Nuclear Fuel – Studying the Baseline Therm... dx.doi.org/10.17635/lancaster/researchdata/14."
-```
 
-#### ResearchMetadataAnnouncement::Format::UriTitle
-
-```ruby
+transformer.uri_title
 #=> "dx.doi.org/10.17635/lancaster/researchdata/29. Herpes simplex virus 1 (HSV-1) evolution."
-```
 
-#### ResearchMetadataAnnouncement::Format::KeywordsUri
-
-```ruby
+transformer.keywords_uri
 #=> "smart cities, sustainability. dx.doi.org/10.17635/lancaster/researchdata/35."
-```
 
-#### ResearchMetadataAnnouncement::Format::HashtagsUri
-
-```ruby
+transformer.hashtags_uri
 #=> "#treatedhypertension #microvascularbloodflow. dx.doi.org/10.17635/lancaster/researchdata/148."
-```
 
-#### ResearchMetadataAnnouncement::Format::UriKeywords
-
-```ruby
+transformer.uri_keywords
 #=> "dx.doi.org/10.17635/lancaster/researchdata/134. metagenomics, deep sequencing."
-```
 
-#### ResearchMetadataAnnouncement::Format::UriHashtags
+transformer.uri_hashtags max_descriptors: 4
+#=> "dx.doi.org/10.17635/lancaster/researchdata/111. #influenza #nasopharynx #virology #virus."
 
-```ruby
-#=> "dx.doi.org/10.17635/lancaster/researchdata/123. #rhinovirus #epidemiology."
 ```
 

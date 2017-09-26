@@ -25,25 +25,8 @@ class TestDatasetTransform < Minitest::Test
     rand(100..200)
   end
 
-  def random_max_keywords
+  def random_max_descriptors
     rand(1..10)
-  end
-
-  def make_announcement_title_format(format, params)
-    transformer = make_transformer
-    format_class = "ResearchMetadataAnnouncement::Format::#{format.to_s}"
-    format = Object.const_get(format_class).new(max_length: params[:max_length])
-    transformer.transform uuid: random_uuid,
-                          format: format
-  end
-
-  def make_announcement_keywords_format(format, params)
-    transformer = make_transformer
-    format_class = "ResearchMetadataAnnouncement::Format::#{format.to_s}"
-    format = Object.const_get(format_class).new(max_length: params[:max_length],
-                                                max_keywords: params[:max_keywords])
-    transformer.transform uuid: random_uuid,
-                          format: format
   end
 
   def asserts(announcement, max_length)
@@ -54,41 +37,32 @@ class TestDatasetTransform < Minitest::Test
     end
   end
 
-  def asserts_title_format(format)
-    max_length = random_max_length
-    params = {max_length: max_length}
-    announcement = make_announcement_title_format(format, params)
-    asserts(announcement, max_length)
-  end
+  title_formats = %i(title_uri uri_title)
+  descriptors_formats = %i(uri_keywords keywords_uri uri_hashtags hashtags_uri)
 
-  def asserts_keywords_format(format)
-    max_length = random_max_length
-    max_keywords = random_max_keywords
-    params = {max_length: max_length,
-              max_keywords: max_keywords}
-    announcement = make_announcement_keywords_format(format, params)
-    asserts(announcement, max_length)
-  end
-
-
-
-  title_formats = %i(TitleUri UriTitle)
-  keywords_formats = %i(KeywordsUri HashtagsUri UriKeywords UriHashtags)
-
-  # Title formats
   title_formats.each do |i|
-    test_name = "test_#{i.downcase}_title_format"
+    test_name = "test_#{i.to_s}_format"
     define_method(test_name) do
-      asserts_title_format(i)
+      transformer = make_transformer
+      max_length = random_max_length
+      transformer.extract uuid: random_uuid
+      announcement = transformer.send i, max_length: max_length
+      asserts(announcement, max_length)
     end
   end
 
-  # Keyword formats
-  keywords_formats.each do |i|
-    test_name = "test_#{i.downcase}_keyword_format"
+  descriptors_formats.each do |i|
+    test_name = "test_#{i.to_s}_format"
     define_method(test_name) do
-      asserts_keywords_format(i)
+      transformer = make_transformer
+      max_length = random_max_length
+      max_descriptors = random_max_descriptors
+      transformer.extract uuid: random_uuid
+      announcement = transformer.send i, max_length: max_length,
+                                         max_descriptors: max_descriptors
+      asserts(announcement, max_length)
     end
   end
+
 
 end
