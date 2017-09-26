@@ -58,7 +58,7 @@ Give it a Pure identifier and extract the metadata.
 transformer.extract uuid: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
 ```
 
-Announcements can be obtained in various formats, assuming the metadata is
+An announcement can be obtained in various formats, assuming the metadata is
 available and the announcement length does not exceed the optional max_length
 argument. Each example uses a different dataset for illustrative purposes.
 
