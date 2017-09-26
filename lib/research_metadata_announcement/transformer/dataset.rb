@@ -133,72 +133,22 @@ module ResearchMetadataAnnouncement
       end
 
       def build_descriptors_formats(format:, keywords:, uri:, max_length:, max_descriptors:)
-        if !keywords.empty?
-          case format
-            when :keywords_uri_format
-              str = append_sentence(build_keywords(keywords, max_descriptors), uri)
-            when :uri_keywords_format
-              str = append_sentence(uri, build_keywords(keywords, max_descriptors))
-            when :hashtags_uri_format
-              str = append_sentence(build_hashtags(keywords, max_descriptors), uri)
-            when :uri_hashtags_format
-              str = append_sentence(uri, build_hashtags(keywords, max_descriptors))
-          end
-          if length_constrained? max_length
-            return str if str.size <= max_length
-          else
-            return str
-          end
+        return nil if keywords.empty?
+        case format
+          when :keywords_uri_format
+            str = append_sentence(build_keywords(keywords, max_descriptors), uri)
+          when :uri_keywords_format
+            str = append_sentence(uri, build_keywords(keywords, max_descriptors))
+          when :hashtags_uri_format
+            str = append_sentence(build_hashtags(keywords, max_descriptors), uri)
+          when :uri_hashtags_format
+            str = append_sentence(uri, build_hashtags(keywords, max_descriptors))
         end
-        nil
-      end
-
-      def build_keywords_uri(keywords:, uri:, max_length:, max_descriptors:)
-        if !keywords.empty?
-          str = append_sentence(build_keywords(keywords, max_descriptors), uri)
-          if length_constrained? max_length
-            return str if str.size <= max_length
-          else
-            return str
-          end
+        if length_constrained? max_length
+          return str if str.size <= max_length
+        else
+          return str
         end
-        nil
-      end
-
-      def build_uri_keywords(keywords:, uri:, max_length:, max_descriptors:)
-        if !keywords.empty?
-          str = append_sentence(uri, build_keywords(keywords, max_descriptors))
-          if length_constrained? max_length
-            return str if str.size <= max_length
-          else
-            return str
-          end
-        end
-        nil
-      end
-
-      def build_uri_hashtags(keywords:, uri:, max_length:, max_descriptors:)
-        if !keywords.empty?
-          str = append_sentence(uri, build_hashtags(keywords, max_descriptors))
-          if length_constrained? max_length
-            return str if str.size <= max_length
-          else
-            return str
-          end
-        end
-        nil
-      end
-
-      def build_hashtags_uri(keywords:, uri:, max_length:, max_descriptors:)
-        if !keywords.empty?
-          str = append_sentence(build_hashtags(keywords, max_descriptors), uri)
-          if length_constrained? max_length
-            return str if str.size <= max_length
-          else
-            return str
-          end
-        end
-        nil
       end
 
       def build_title_uri(title:, uri:, max_length:)
