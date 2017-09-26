@@ -87,29 +87,38 @@ module ResearchMetadataAnnouncement
       # @param max_length [Fixnum]
       # @return [String, nil] Announcement returned if the metadata is available and the announcement length does not exceed the max_length argument.
       def title_uri(max_length: nil)
-        return nil if !@resource
-        title = @resource.title
-        uri = prepare_uri
-        if uri
-          return build_title_uri(uri: uri, title: title, max_length: max_length)
-        end
-        nil
+        title_formats format: :title_uri_format,
+                      max_length: max_length
       end
 
       # Uri followed by title format
       #
       # @see #title_uri
       def uri_title(max_length: nil)
-        return nil if !@resource
-        title = @resource.title
-        uri = prepare_uri
-        if uri
-          return build_uri_title(uri: uri, title: title, max_length: max_length)
-        end
-        nil
+        title_formats format: :uri_title_format,
+                      max_length: max_length
       end
 
       private
+
+      def title_formats(format:, max_length: nil)
+        return nil if !@resource
+        uri = prepare_uri
+        title = @resource.title
+        if uri
+          case format
+            when :title_uri_format
+              return build_title_uri(uri: uri,
+                                     title: title,
+                                     max_length: max_length)
+            when :uri_title_format
+              return build_uri_title(uri: uri,
+                                     title: title,
+                                     max_length: max_length)
+          end
+        end
+        nil
+      end
 
       def prepare_uri
         if @resource && @resource.doi
