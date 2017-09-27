@@ -89,6 +89,7 @@ module ResearchMetadataAnnouncement
         uri = prepare_uri
         return nil unless uri
         keywords = @resource.keywords
+        return nil if keywords.empty?
         build_descriptors_formats(format: format,
                                   keywords: keywords,
                                   uri: uri,
@@ -104,7 +105,6 @@ module ResearchMetadataAnnouncement
       end
 
       def build_descriptors_formats(format:, keywords:, uri:, max_length:, max_descriptors:)
-        return nil if keywords.empty?
         case format
           when :keywords_uri_format
             str = append_sentence(build_keywords(keywords, max_descriptors), uri)
