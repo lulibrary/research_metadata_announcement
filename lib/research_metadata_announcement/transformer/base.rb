@@ -43,7 +43,7 @@ module ResearchMetadataAnnouncement
       end
 
       def strip_uri_scheme(uri)
-        uri.sub /^.+\/\//, ''
+        uri.sub %r{^.+//}, ''
       end
 
       def length_constrained?(max_length)
