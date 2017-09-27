@@ -98,17 +98,14 @@ module ResearchMetadataAnnouncement
       end
 
       def prepare_uri
-        if @resource && @resource.doi
-          return strip_uri_scheme @resource.doi
-        end
-        nil
+        strip_uri_scheme @resource.doi if @resource && @resource.doi
       end
 
       def validate_string_length(str, max_length)
         if length_constrained? max_length
-          return str if str.size <= max_length
+          str if str.size <= max_length
         else
-          return str
+          str
         end
       end
 
@@ -129,9 +126,9 @@ module ResearchMetadataAnnouncement
       def build_title_format(format:, title:, uri:)
         case format
           when :title_uri_format
-            return append_sentence title, uri
+            append_sentence title, uri
           when :uri_title_format
-            return append_sentence uri, title
+            append_sentence uri, title
         end
       end
 
@@ -139,9 +136,9 @@ module ResearchMetadataAnnouncement
         truncated_title = title[0..available_chars-3].strip + '...'
         case format
           when :title_uri_format
-            return "#{truncated_title} #{uri}."
+            "#{truncated_title} #{uri}."
           when :uri_title_format
-            return "#{uri}. #{truncated_title}"
+            "#{uri}. #{truncated_title}"
         end
       end
 
@@ -161,9 +158,9 @@ module ResearchMetadataAnnouncement
                                                 available_chars: available_chars)
           end
         else
-          return build_title_format(format: format,
-                                    title: title,
-                                    uri: uri)
+          build_title_format(format: format,
+                             title: title,
+                             uri: uri)
         end
       end
 
