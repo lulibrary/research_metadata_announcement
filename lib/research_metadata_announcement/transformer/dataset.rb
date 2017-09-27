@@ -126,34 +126,44 @@ module ResearchMetadataAnnouncement
         validate_string_length str, max_length
       end
 
+      def build_title_format(format:, title:, uri:)
+        case format
+          when :title_uri_format
+            return append_sentence title, uri
+          when :uri_title_format
+            return append_sentence uri, title
+        end
+      end
+
+      def build_title_format_truncated(format:, title:, uri:, available_chars:)
+        truncated_title = title[0..available_chars-3].strip + '...'
+        case format
+          when :title_uri_format
+            return "#{truncated_title} #{uri}."
+          when :uri_title_format
+            return "#{uri}. #{truncated_title}"
+        end
+      end
+
       def build_title_formats(format:, title:, uri:, max_length:)
         if length_constrained? max_length
           available_chars = max_length - (uri.size + 3)
           available_chars = 0 if available_chars < 0
           if title.size <= available_chars
-            case format
-              when :title_uri_format
-                return append_sentence title, uri
-              when :uri_title_format
-                return append_sentence uri, title
-            end
+            return build_title_format(format: format,
+                                      title: title,
+                                      uri: uri)
           end
           if available_chars - 3 > 0
-            truncated_title = title[0..available_chars-3].strip + '...'
-            case format
-              when :title_uri_format
-                return "#{truncated_title} #{uri}."
-              when :uri_title_format
-                return "#{uri}. #{truncated_title}"
-            end
+            return build_title_format_truncated(format: format,
+                                                title: title,
+                                                uri: uri,
+                                                available_chars: available_chars)
           end
         else
-          case format
-            when :title_uri_format
-              return append_sentence title, uri
-            when :uri_title_format
-              return append_sentence uri, title
-          end
+          return build_title_format(format: format,
+                                    title: title,
+                                    uri: uri)
         end
       end
 
