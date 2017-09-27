@@ -104,6 +104,14 @@ module ResearchMetadataAnnouncement
         nil
       end
 
+      def validate_string_length(str, max_length)
+        if length_constrained? max_length
+          return str if str.size <= max_length
+        else
+          return str
+        end
+      end
+
       def build_descriptors_formats(format:, keywords:, uri:, max_length:, max_descriptors:)
         case format
           when :keywords_uri_format
@@ -115,11 +123,7 @@ module ResearchMetadataAnnouncement
           when :uri_hashtags_format
             str = append_sentence(uri, build_hashtags(keywords, max_descriptors))
         end
-        if length_constrained? max_length
-          return str if str.size <= max_length
-        else
-          return str
-        end
+        validate_string_length str, max_length
       end
 
       def build_title_formats(format:, title:, uri:, max_length:)
