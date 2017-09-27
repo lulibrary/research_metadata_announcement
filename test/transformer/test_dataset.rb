@@ -30,11 +30,10 @@ class TestDatasetTransform < Minitest::Test
   end
 
   def asserts(announcement, max_length)
-    if announcement
-      assert_instance_of String, announcement
-      assert announcement.size > 0
-      assert announcement.size <= max_length
-    end
+    return unless announcement
+    assert_instance_of String, announcement
+    assert !announcement.empty?
+    assert announcement.size <= max_length
   end
 
   title_formats = %i(title_uri uri_title)
