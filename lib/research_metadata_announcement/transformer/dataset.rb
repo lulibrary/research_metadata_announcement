@@ -74,55 +74,26 @@ module ResearchMetadataAnnouncement
       private
 
       def title_formats(format:, max_length:)
-        return nil if !@resource
+        return nil unless @resource
         uri = prepare_uri
-        return nil if !uri
+        return nil unless uri
         title = @resource.title
-        case format
-          when :title_uri_format
-            return build_title_formats(format: :title_uri_format,
-                                       uri: uri,
-                                       title: title,
-                                       max_length: max_length)
-          when :uri_title_format
-            return build_title_formats(format: :uri_title_format,
-                                       uri: uri,
-                                       title: title,
-                                       max_length: max_length)
-        end
+        build_title_formats(format: format,
+                            uri: uri,
+                            title: title,
+                            max_length: max_length)
       end
 
       def descriptors_formats(format:, max_length:, max_descriptors:)
-        return nil if !@resource
+        return nil unless @resource
         uri = prepare_uri
-        return nil if !uri
+        return nil unless uri
         keywords = @resource.keywords
-        case format
-          when :keywords_uri_format
-            return build_descriptors_formats(format: :keywords_uri_format,
-                                             keywords: keywords,
-                                             uri: uri,
-                                             max_length: max_length,
-                                             max_descriptors: max_descriptors)
-          when :uri_keywords_format
-            return build_descriptors_formats(format: :uri_keywords_format,
-                                             keywords: keywords,
-                                             uri: uri,
-                                             max_length: max_length,
-                                             max_descriptors: max_descriptors)
-          when :hashtags_uri_format
-            return build_descriptors_formats(format: :hashtags_uri_format,
-                                             keywords: keywords,
-                                             uri: uri,
-                                             max_length: max_length,
-                                             max_descriptors: max_descriptors)
-          when :uri_hashtags_format
-            return build_descriptors_formats(format: :uri_hashtags_format,
-                                             keywords: keywords,
-                                             uri: uri,
-                                             max_length: max_length,
-                                             max_descriptors: max_descriptors)
-        end
+        build_descriptors_formats(format: format,
+                                  keywords: keywords,
+                                  uri: uri,
+                                  max_length: max_length,
+                                  max_descriptors: max_descriptors)
       end
 
       def prepare_uri
