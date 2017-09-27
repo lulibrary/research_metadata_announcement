@@ -134,7 +134,7 @@ module ResearchMetadataAnnouncement
                 return append_sentence uri, title
             end
           end
-          if available_chars-3 > 0
+          if available_chars - 3 > 0
             truncated_title = title[0..available_chars-3].strip + '...'
             case format
               when :title_uri_format
@@ -154,20 +154,15 @@ module ResearchMetadataAnnouncement
       end
 
       def build_keywords(keywords, max)
-        return keywords[0..max-1].join ', ' if keywords
-        nil
+        keywords[0..max - 1].join ', '
       end
 
       def build_hashtags(keywords, max)
-        a = keywords[0..max-1].map { |i| i.downcase }
-        a = a.map { |i| i.gsub(/[^a-zA-Z0-9]/,'') }
-        a = a.map { |i| i.gsub(/\s+/, '')  }
+        a = keywords[0..max - 1].map(&:downcase)
+        a = a.map { |i| i.gsub(/[^a-zA-Z0-9]/, '') }
+        a = a.map { |i| i.gsub(/\s+/, '') }
         a = a.map { |i| "##{i}" }
-        if a.size > 0
-          return a.join ' '
-        else
-          return nil
-        end
+        a.join ' '
       end
 
     end

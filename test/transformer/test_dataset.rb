@@ -41,7 +41,7 @@ class TestDatasetTransform < Minitest::Test
   descriptors_formats = %i(uri_keywords keywords_uri uri_hashtags hashtags_uri)
 
   title_formats.each do |i|
-    test_name = "test_#{i.to_s}_format"
+    test_name = "test_#{i}_format"
     define_method(test_name) do
       transformer = make_transformer
       max_length = random_max_length
@@ -52,7 +52,7 @@ class TestDatasetTransform < Minitest::Test
   end
 
   descriptors_formats.each do |i|
-    test_name = "test_#{i.to_s}_format"
+    test_name = "test_#{i}_format"
     define_method(test_name) do
       transformer = make_transformer
       max_length = random_max_length

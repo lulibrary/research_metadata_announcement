@@ -29,9 +29,9 @@ module ResearchMetadataAnnouncement
       private
 
       def append_sentence(str, str_to_append)
-        if str_to_append && str_to_append.size > 0
+        if str_to_append && !str_to_append.empty?
           if str
-            if str.size > 0
+            if !str.empty?
               "#{str}. #{str_to_append}."
             else
               "#{str_to_append}."
