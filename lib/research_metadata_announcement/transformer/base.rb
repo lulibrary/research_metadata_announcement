@@ -26,30 +26,6 @@ module ResearchMetadataAnnouncement
         end
       end
 
-      private
-
-      def append_sentence(str, str_to_append)
-        if str_to_append && !str_to_append.empty?
-          if str
-            if !str.empty?
-              "#{str}. #{str_to_append}."
-            else
-              "#{str_to_append}."
-            end
-          end
-        else
-          str
-        end
-      end
-
-      def strip_uri_scheme(uri)
-        uri.sub %r{^.+//}, ''
-      end
-
-      def length_constrained?(max_length)
-        max_length && max_length > 0
-      end
-
       # Title followed by uri format
       #
       # @param max_length [Fixnum]
@@ -103,6 +79,30 @@ module ResearchMetadataAnnouncement
         descriptors_formats format: :uri_hashtags_format,
                             max_length: max_length,
                             max_descriptors: max_descriptors
+      end
+
+      private
+
+      def append_sentence(str, str_to_append)
+        if str_to_append && !str_to_append.empty?
+          if str
+            if !str.empty?
+              "#{str}. #{str_to_append}."
+            else
+              "#{str_to_append}."
+            end
+          end
+        else
+          str
+        end
+      end
+
+      def strip_uri_scheme(uri)
+        uri.sub %r{^.+//}, ''
+      end
+
+      def length_constrained?(max_length)
+        max_length && max_length > 0
       end
 
       def title_formats(format:, max_length:)
@@ -206,7 +206,7 @@ module ResearchMetadataAnnouncement
 
       def make_extractor(resource_type)
         resource_class = "Puree::Extractor::#{resource_type.capitalize}"
-        @resource_extractor = Object.const_get(resource_class).new config
+        @resource_extractor = Object.const_get(resource_class).new @config
       end
 
     end
