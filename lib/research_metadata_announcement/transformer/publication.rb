@@ -2,10 +2,10 @@ module ResearchMetadataAnnouncement
 
   module Transformer
 
-    # Extracts dataset metadata from the Pure Research Information System and
+    # Extracts publication metadata from the Pure Research Information System and
     # converts it into an announcement
     #
-    class Dataset < ResearchMetadataAnnouncement::Transformer::Base
+    class Publication < ResearchMetadataAnnouncement::Transformer::Base
 
       # @param config [Hash]
       # @option config [String] :url The URL of the Pure host.
@@ -13,13 +13,13 @@ module ResearchMetadataAnnouncement
       # @option config [String] :password The password of the Pure host account.
       def initialize(config)
         super
-        make_extractor :dataset
+        make_extractor :publication
       end
 
       private
 
       def prepare_uri
-        strip_uri_scheme @resource.doi if @resource && @resource.doi
+        strip_uri_scheme @resource.dois[0] if @resource && @resource.dois[0]
       end
 
     end
