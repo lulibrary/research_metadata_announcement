@@ -14,6 +14,93 @@ module ResearchMetadataAnnouncement
         @config = config
       end
 
+      # @param id [String] Pure ID.
+      # @param uuid [String] Pure UUID.
+      # @param permutation [Array<Symbol>] Metadata presentation sequence e.g. [:new, :title, :hashtags, :uri].
+      # @param max_length [Fixnum] Maximum length of announcement.
+      # @param max_descriptors [Fixnum] Maximum number of descriptors (common name for keywords, tags, hashtags).
+      # @return [String, nil] Announcement returned if the metadata is available and the announcement length does not exceed the max_length argument.
+      def transform(uuid: nil, id: nil, permutation: [:new, :title, :hashtags, :uri],
+                    max_length: nil, max_descriptors: 2)
+        permutation.uniq!
+        extract uuid: uuid, id: id
+        return nil unless @resource
+        if permutation.include? :uri
+          return nil unless prepare_uri
+        end
+        title = @resource.title
+        keywords = @resource.keywords
+
+        # sizing
+        if length_constrained? max_length
+          chars_needed = 0
+          chars_component_end = 2
+          permutation.each do |component|
+            case component
+              when :new
+                resource = self.class.name.sub('ResearchMetadataAnnouncement::Transformer::', '')
+                phrase = "New research #{resource.downcase}"
+                chars_needed += phrase.size + chars_component_end
+              when :title
+                chars_needed += title.size + chars_component_end
+              when :keywords
+                chars_needed += build_keywords(keywords, max_descriptors).size + chars_component_end if !keywords.empty?
+              when :hashtags
+                chars_needed += build_hashtags(keywords, max_descriptors).size + chars_component_end if !keywords.empty?
+              when :uri
+                uri = prepare_uri
+                chars_needed += uri.size if uri
+            end
+          end
+
+          # determine if title needs truncating/removing before combining
+          if chars_needed > max_length
+            # truncate title
+            if permutation.include? :title
+              excess_chars = chars_needed - max_length
+              truncated_title_length = title.size - excess_chars
+              truncated_title_length = 0 if truncated_title_length < 0
+              title = title[0..truncated_title_length - 2].strip + '..'
+              permutation -= [:title] if title.size <= 5 # give up on title if just too small
+            end
+          end
+        end
+
+        # get data for combining
+        buffer = []
+        permutation.each do |component|
+          case component
+            when :new
+              resource = self.class.name.sub('ResearchMetadataAnnouncement::Transformer::', '')
+              phrase = "New #{resource.downcase}"
+              buffer << phrase
+            when :title
+              buffer << title
+            when :keywords
+              buffer << build_keywords(keywords, max_descriptors) if !keywords.empty?
+            when :hashtags
+              buffer << build_hashtags(keywords, max_descriptors) if !keywords.empty?
+            when :uri
+              uri = prepare_uri
+              buffer << uri if uri
+          end
+        end
+
+        # combine, separate by period
+        str = buffer.join('. ')
+
+        # make phrase ending grammatically correct
+        str = str.gsub('?.', '?')
+        str = str.gsub('!.', '!')
+
+        # terminate entire announcement
+        str << '.'
+
+        validate_string_length str, max_length unless str.empty?
+      end
+
+      private
+
       # Extract metadata from Pure
       #
       # @param id [String]
@@ -26,77 +113,6 @@ module ResearchMetadataAnnouncement
         end
       end
 
-      # Title followed by uri format
-      #
-      # @param max_length [Fixnum]
-      # @return [String, nil] Announcement returned if the metadata is available and the announcement length does not exceed the max_length argument.
-      def title_uri(max_length: nil)
-        title_formats format: :title_uri_format,
-                      max_length: max_length
-      end
-
-      # Uri followed by title format
-      #
-      # @see #title_uri
-      def uri_title(max_length: nil)
-        title_formats format: :uri_title_format,
-                      max_length: max_length
-      end
-
-      # Keywords followed by uri format
-      #
-      # @param max_length [Fixnum] Maximum length of announcement.
-      # @param max_descriptors [Fixnum] Maximum number of descriptors (common name for keywords, tags, hashtags).
-      # @return [String, nil] Announcement returned if the metadata is available and the announcement length does not exceed the max_length argument.
-      def keywords_uri(max_length: nil, max_descriptors: 2)
-        descriptors_formats format: :keywords_uri_format,
-                            max_length: max_length,
-                            max_descriptors: max_descriptors
-      end
-
-      # Uri followed by keywords format
-      #
-      # @see #keywords_uri
-      def uri_keywords(max_length: nil, max_descriptors: 2)
-        descriptors_formats format: :uri_keywords_format,
-                            max_length: max_length,
-                            max_descriptors: max_descriptors
-      end
-
-      # Hashtags followed by uri format
-      #
-      # @see #keywords_uri
-      def hashtags_uri(max_length: nil, max_descriptors: 2)
-        descriptors_formats format: :hashtags_uri_format,
-                            max_length: max_length,
-                            max_descriptors: max_descriptors
-      end
-
-      # Uri followed by hashtags format
-      #
-      # @see #keywords_uri
-      def uri_hashtags(max_length: nil, max_descriptors: 2)
-        descriptors_formats format: :uri_hashtags_format,
-                            max_length: max_length,
-                            max_descriptors: max_descriptors
-      end
-
-      private
-
-      def append_sentence(str, str_to_append)
-        if str_to_append && !str_to_append.empty?
-          if str
-            if !str.empty?
-              "#{str}. #{str_to_append}."
-            else
-              "#{str_to_append}."
-            end
-          end
-        else
-          str
-        end
-      end
-
       def strip_uri_scheme(uri)
         uri.sub %r{^.+//}, ''
       end
@@ -105,90 +121,11 @@ module ResearchMetadataAnnouncement
         max_length && max_length > 0
       end
 
-      def title_formats(format:, max_length:)
-        return nil unless @resource
-        uri = prepare_uri
-        return nil unless uri
-        title = @resource.title
-        build_title_formats(format: format,
-                            uri: uri,
-                            title: title,
-                            max_length: max_length)
-      end
-
-      def descriptors_formats(format:, max_length:, max_descriptors:)
-        return nil unless @resource
-        uri = prepare_uri
-        return nil unless uri
-        keywords = @resource.keywords
-        return nil if keywords.empty?
-        build_descriptors_formats(format: format,
-                                  keywords: keywords,
-                                  uri: uri,
-                                  max_length: max_length,
-                                  max_descriptors: max_descriptors)
-      end
-
       def validate_string_length(str, max_length)
         if length_constrained? max_length
           str if str.size <= max_length
         else
           str
-        end
-      end
-
-      def build_descriptors_formats(format:, keywords:, uri:, max_length:, max_descriptors:)
-        case format
-          when :keywords_uri_format
-            str = append_sentence(build_keywords(keywords, max_descriptors), uri)
-          when :uri_keywords_format
-            str = append_sentence(uri, build_keywords(keywords, max_descriptors))
-          when :hashtags_uri_format
-            str = append_sentence(build_hashtags(keywords, max_descriptors), uri)
-          when :uri_hashtags_format
-            str = append_sentence(uri, build_hashtags(keywords, max_descriptors))
-        end
-        validate_string_length str, max_length
-      end
-
-      def build_title_format(format:, title:, uri:)
-        case format
-          when :title_uri_format
-            append_sentence title, uri
-          when :uri_title_format
-            append_sentence uri, title
-        end
-      end
-
-      def build_title_format_truncated(format:, title:, uri:, available_chars:)
-        truncated_title = title[0..available_chars-3].strip + '...'
-        case format
-          when :title_uri_format
-            "#{truncated_title} #{uri}."
-          when :uri_title_format
-            "#{uri}. #{truncated_title}"
-        end
-      end
-
-      def build_title_formats(format:, title:, uri:, max_length:)
-        if length_constrained? max_length
-          available_chars = max_length - (uri.size + 3)
-          available_chars = 0 if available_chars < 0
-          if title.size <= available_chars
-            return build_title_format(format: format,
-                                      title: title,
-                                      uri: uri)
-          end
-          if available_chars - 3 > 0
-            return build_title_format_truncated(format: format,
-                                                title: title,
-                                                uri: uri,
-                                                available_chars: available_chars)
-          end
-        else
-          build_title_format(format: format,
-                             title: title,
-                             uri: uri)
         end
       end
 
