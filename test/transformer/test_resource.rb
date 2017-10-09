@@ -11,32 +11,24 @@ class TestResourceTransform < Minitest::Test
 
   resources = [:dataset, :publication]
 
-  title_formats = %i(title_uri uri_title)
-  descriptors_formats = %i(uri_keywords keywords_uri uri_hashtags hashtags_uri)
+  components_keywords = [:new, :title, :keywords, :uri]
+  components_hashtags = [:new, :title, :hashtags, :uri]
+  permutations = []
+  components_keywords.permutation.each { |i| permutations << i }
+  components_hashtags.permutation.each { |i| permutations << i }
 
   resources.each do |resource|
-    title_formats.each do |i|
-      test_name = "test_#{resource}_#{i}_format"
+    uuid = random_uuid(resource)
+    permutations.each do |permutation|
+      permutation_name = permutation.join('_')
+      test_name = "test_#{resource}_#{uuid}_#{permutation_name}_format"
       define_method(test_name) do
         transformer = make_transformer resource
         max_length = random_max_length
-        transformer.extract uuid: random_uuid(resource)
-        announcement = transformer.public_send i, max_length: max_length
-        asserts(announcement, max_length)
-      end
-    end
-  end
-
-  resources.each do |resource|
-    descriptors_formats.each do |i|
-      test_name = "test_#{resource}_#{i}_format"
-      define_method(test_name) do
-        transformer = make_transformer resource
-        max_length = random_max_length
-        max_descriptors = random_max_descriptors
-        transformer.extract uuid: random_uuid(resource)
-        announcement = transformer.public_send i, max_length: max_length,
-                                               max_descriptors: max_descriptors
+        announcement = transformer.transform uuid: uuid,
+                                             permutation: permutation,
+                                             max_length: max_length,
+                                             max_descriptors: random_max_descriptors
         asserts(announcement, max_length)
       end
     end

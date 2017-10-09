@@ -32,5 +32,5 @@ def random_max_length
 end
 
 def random_max_descriptors
-  rand(1..10)
+  rand(1..5)
 end
