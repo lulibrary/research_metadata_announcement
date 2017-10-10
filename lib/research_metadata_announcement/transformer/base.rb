@@ -16,16 +16,16 @@ module ResearchMetadataAnnouncement
 
       # @param id [String] Pure ID.
       # @param uuid [String] Pure UUID.
-      # @param permutation [Array<Symbol>] Metadata presentation sequence e.g. [:new, :title, :hashtags, :uri].
+      # @param composition [Array<Symbol>] Metadata presentation sequence e.g. [:new, :title, :hashtags, :uri].
       # @param max_length [Fixnum] Maximum length of announcement.
       # @param max_descriptors [Fixnum] Maximum number of descriptors (common name for keywords, tags, hashtags).
       # @return [String, nil] Announcement returned if the metadata is available and the announcement length does not exceed the max_length argument.
-      def transform(uuid: nil, id: nil, permutation: [:new, :title, :hashtags, :uri],
+      def transform(uuid: nil, id: nil, composition: [:new, :title, :hashtags, :uri],
                     max_length: nil, max_descriptors: 2)
-        permutation.uniq!
+        composition.uniq!
         extract uuid: uuid, id: id
         return nil unless @resource
-        if permutation.include? :uri
+        if composition.include? :uri
           return nil unless prepare_uri
         end
         title = @resource.title
@@ -35,7 +35,7 @@ module ResearchMetadataAnnouncement
         if length_constrained? max_length
           chars_needed = 0
           chars_component_end = 2
-          permutation.each do |component|
+          composition.each do |component|
             case component
               when :new
                 resource = self.class.name.sub('ResearchMetadataAnnouncement::Transformer::', '')
@@ -56,19 +56,19 @@ module ResearchMetadataAnnouncement
           # determine if title needs truncating/removing before combining
           if chars_needed > max_length
             # truncate title
-            if permutation.include? :title
+            if composition.include? :title
               excess_chars = chars_needed - max_length
               truncated_title_length = title.size - excess_chars
               truncated_title_length = 0 if truncated_title_length < 0
               title = title[0..truncated_title_length - 2].strip + '..'
-              permutation -= [:title] if title.size <= 5 # give up on title if just too small
+              composition -= [:title] if title.size <= 5 # give up on title if just too small
             end
           end
         end
 
         # get data for combining
         buffer = []
-        permutation.each do |component|
+        composition.each do |component|
           case component
             when :new
               resource = self.class.name.sub('ResearchMetadataAnnouncement::Transformer::', '')

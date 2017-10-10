@@ -4,9 +4,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## 0.4.0 - 2017-10-10
+### Changed
+- Permutation keyword argument renamed to composition.
+
 ## 0.3.0 - 2017-10-09
 ### Changed
-- Simplified API, allowing flexible permutations of announcement components.
+- Simplified API, allowing flexible compositions of announcement components.
 
 ## 0.2.0 - 2017-09-29
 ### Added

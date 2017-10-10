@@ -13,20 +13,20 @@ class TestResourceTransform < Minitest::Test
 
   components_keywords = [:new, :title, :keywords, :uri]
   components_hashtags = [:new, :title, :hashtags, :uri]
-  permutations = []
-  components_keywords.permutation.each { |i| permutations << i }
-  components_hashtags.permutation.each { |i| permutations << i }
+  compositions = []
+  components_keywords.permutation.each { |i| compositions << i }
+  components_hashtags.permutation.each { |i| compositions << i }
 
   resources.each do |resource|
     uuid = random_uuid(resource)
-    permutations.each do |permutation|
-      permutation_name = permutation.join('_')
-      test_name = "test_#{resource}_#{uuid}_#{permutation_name}_format"
+    compositions.each do |composition|
+      composition_name = composition.join('_')
+      test_name = "test_#{resource}_#{uuid}_#{composition_name}_format"
       define_method(test_name) do
         transformer = make_transformer resource
         max_length = random_max_length
         announcement = transformer.transform uuid: uuid,
-                                             permutation: permutation,
+                                             composition: composition,
                                              max_length: max_length,
                                              max_descriptors: random_max_descriptors
         asserts(announcement, max_length)
