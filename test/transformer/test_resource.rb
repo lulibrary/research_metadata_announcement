@@ -80,8 +80,6 @@ class TestResourceTransform < Minitest::Test
                                          max_descriptors: random_max_descriptors
 
     # puts announcement
-
-    asserts(announcement, max_length)
   end
 
 end
