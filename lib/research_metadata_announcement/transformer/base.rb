@@ -6,24 +6,25 @@ module ResearchMetadataAnnouncement
     class Base
 
       # @param config [Hash]
-      # @option config [String] :url The URL of the Pure host.
-      # @option config [String] :username The username of the Pure host account.
-      # @option config [String] :password The password of the Pure host account.
-
+      # @option config [String] :url URL of the Pure host
+      # @option config [String] :username Username of the Pure host account
+      # @option config [String] :password Password of the Pure host account
+      # @option config [String] :api_key API key of the Pure host account
       def initialize(config)
         @config = config
       end
 
-      # @param id [String] Pure ID.
-      # @param uuid [String] Pure UUID.
+      # @param id [String] Pure identifier.
       # @param composition [Array<Symbol>] Metadata presentation sequence e.g. [:new, :title, :hashtags, :uri].
       # @param max_length [Fixnum] Maximum length of announcement.
       # @param max_descriptors [Fixnum] Maximum number of descriptors (common name for keywords, tags, hashtags).
       # @return [String, nil] Announcement returned if the metadata is available and the announcement length does not exceed the max_length argument.
-      def transform(uuid: nil, id: nil, composition: [:new, :title, :hashtags, :uri],
+      def transform(id:, composition: [:new, :title, :hashtags, :uri],
                     max_length: nil, max_descriptors: 2)
         composition.uniq!
-        extract uuid: uuid, id: id
+
+        @resource = @resource_extractor.find id
+
         return nil unless @resource
         if composition.include? :uri
           return nil unless prepare_uri
@@ -38,8 +39,7 @@ module ResearchMetadataAnnouncement
           composition.each do |component|
             case component
               when :new
-                resource = self.class.name.sub('ResearchMetadataAnnouncement::Transformer::', '')
-                phrase = "New research #{resource.downcase}"
+                phrase =  new_phrase(@resource)
                 chars_needed += phrase.size + chars_component_end
               when :title
                 chars_needed += title.size + chars_component_end
@@ -71,9 +71,7 @@ module ResearchMetadataAnnouncement
         composition.each do |component|
           case component
             when :new
-              resource = self.class.name.sub('ResearchMetadataAnnouncement::Transformer::', '')
-              phrase = "New #{resource.downcase}"
-              buffer << phrase
+              buffer << new_phrase(@resource)
             when :title
               buffer << title
             when :keywords
@@ -101,16 +99,25 @@ module ResearchMetadataAnnouncement
 
       private
 
-      # Extract metadata from Pure
-      #
-      # @param id [String]
-      # @param uuid [String]
-      def extract(uuid: nil, id: nil)
-        if !uuid.nil?
-          @resource = @resource_extractor.find uuid: uuid
-        else
-          @resource = @resource_extractor.find id: id
+      def new_phrase(resource)
+        part_1 = 'New'
+        part_2 = ''
+
+        case resource.class.to_s
+          when 'Puree::Model::Dataset'
+            part_2 = 'dataset'
+          when 'Puree::Model::ResearchOutput'
+            part_2 = resource.type.downcase
         end
+        if part_2.empty?
+          return part_1
+        else
+          return "#{part_1} #{part_2}"
+        end
+      end
+
+      def prepare_uri
+        strip_uri_scheme @resource.doi if @resource && @resource.doi
       end
 
       def strip_uri_scheme(uri)
@@ -142,7 +149,7 @@ module ResearchMetadataAnnouncement
       end
 
       def make_extractor(resource_type)
-        resource_class = "Puree::Extractor::#{resource_type.capitalize}"
+        resource_class = "Puree::Extractor::#{Puree::Util::String.titleize(resource_type)}"
         @resource_extractor = Object.const_get(resource_class).new @config
       end
 
