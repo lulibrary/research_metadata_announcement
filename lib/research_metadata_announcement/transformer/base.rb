@@ -29,7 +29,7 @@ module ResearchMetadataAnnouncement
         if composition.include? :uri
           return nil unless prepare_uri
         end
-        title = @resource.title
+        title = remove_full_stop @resource.title
         keywords = @resource.keywords
 
         # sizing
@@ -49,9 +49,15 @@ module ResearchMetadataAnnouncement
                 chars_needed += build_hashtags(keywords, max_descriptors).size + chars_component_end if !keywords.empty?
               when :uri
                 uri = prepare_uri
-                chars_needed += uri.size if uri
+                chars_needed += uri.size + chars_component_end if uri
             end
           end
+
+          # since the arrangement of the composition is unknown, after sizing
+          # chars_needed has two extra spaces allocated
+          # one is used for the terminating full stop
+          # one is not needed
+          chars_needed -= 1
 
           # determine if title needs truncating/removing before combining
           if chars_needed > max_length
@@ -60,7 +66,7 @@ module ResearchMetadataAnnouncement
               excess_chars = chars_needed - max_length
               truncated_title_length = title.size - excess_chars
               truncated_title_length = 0 if truncated_title_length < 0
-              title = title[0..truncated_title_length - 2].strip + '..'
+              title = title[0..truncated_title_length - 3].strip + '..'
               composition -= [:title] if title.size <= 5 # give up on title if just too small
             end
           end
@@ -99,6 +105,15 @@ module ResearchMetadataAnnouncement
 
       private
 
+      def remove_full_stop(str)
+        arr = str.split('')
+        if arr.pop == '.' && arr.pop != '.'
+          return str.chomp('.')
+        else
+          return str
+        end
+      end
+
       def new_phrase(resource)
         part_1 = 'New'
         part_2 = ''
@@ -116,12 +131,21 @@ module ResearchMetadataAnnouncement
         end
       end
 
-      def prepare_uri
-        strip_uri_scheme @resource.doi if @resource && @resource.doi
-      end
-
       def strip_uri_scheme(uri)
         uri.sub %r{^.+//}, ''
+      end
+
+      private
+
+      def prepare_uri
+        uri = strip_uri_scheme @resource.doi if @resource && @resource.doi
+        return unless uri
+        resolver = 'dx.doi.org'
+        if uri.include? resolver
+          uri
+        else
+          File.join resolver, uri
+        end
       end
 
       def length_constrained?(max_length)
