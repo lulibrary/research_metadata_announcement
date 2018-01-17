@@ -135,8 +135,6 @@ module ResearchMetadataAnnouncement
         uri.sub %r{^.+//}, ''
       end
 
-      private
-
       def prepare_uri
         uri = strip_uri_scheme @resource.doi if @resource && @resource.doi
         return unless uri
