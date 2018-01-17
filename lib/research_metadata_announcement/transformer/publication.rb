@@ -19,7 +19,8 @@ module ResearchMetadataAnnouncement
       private
 
       def prepare_uri
-        strip_uri_scheme @resource.dois[0] if @resource && @resource.dois[0]
+        uri = strip_uri_scheme @resource.dois[0] if @resource && @resource.dois[0]
+        handle_resolver uri
       end
 
     end

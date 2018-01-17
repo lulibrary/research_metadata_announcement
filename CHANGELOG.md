@@ -2,7 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## 0.4.1 - 2018-01-17
+### Added
+- Testing announcements against known live data.
+
+### Fixed
+- Ellipsis after truncated title.
+
+### Changed
+- Cope with missing resolver in DOI.
+- Cope with full stop in title.
 
 ## 0.4.0 - 2017-10-10
 ### Changed
