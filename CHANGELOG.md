@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.5.1 - 2018-01-17
+### Added
+- Testing announcements against known live data.
+
+### Fixed
+- Ellipsis after truncated title.
+
+### Changed
+- Cope with missing resolver in DOI.
+- Cope with full stop in title.
+
 ## 0.5.0 - 2018-01-11
 ### Changed
 - For Pure API 59.
