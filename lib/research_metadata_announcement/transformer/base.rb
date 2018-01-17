@@ -28,7 +28,7 @@ module ResearchMetadataAnnouncement
         if composition.include? :uri
           return nil unless prepare_uri
         end
-        title = @resource.title
+        title = remove_full_stop @resource.title
         keywords = @resource.keywords
 
         # sizing
@@ -38,8 +38,7 @@ module ResearchMetadataAnnouncement
           composition.each do |component|
             case component
               when :new
-                resource = self.class.name.sub('ResearchMetadataAnnouncement::Transformer::', '')
-                phrase = "New research #{resource.downcase}"
+                phrase = new_phrase(@resource)
                 chars_needed += phrase.size + chars_component_end
               when :title
                 chars_needed += title.size + chars_component_end
@@ -49,9 +48,15 @@ module ResearchMetadataAnnouncement
                 chars_needed += build_hashtags(keywords, max_descriptors).size + chars_component_end if !keywords.empty?
               when :uri
                 uri = prepare_uri
-                chars_needed += uri.size if uri
+                chars_needed += uri.size + chars_component_end if uri
             end
           end
+
+          # since the arrangement of the composition is unknown, after sizing
+          # chars_needed has two extra spaces allocated
+          # one is used for the terminating full stop
+          # one is not needed
+          chars_needed -= 1
 
           # determine if title needs truncating/removing before combining
           if chars_needed > max_length
@@ -60,7 +65,7 @@ module ResearchMetadataAnnouncement
               excess_chars = chars_needed - max_length
               truncated_title_length = title.size - excess_chars
               truncated_title_length = 0 if truncated_title_length < 0
-              title = title[0..truncated_title_length - 2].strip + '..'
+              title = title[0..truncated_title_length - 3].strip + '..'
               composition -= [:title] if title.size <= 5 # give up on title if just too small
             end
           end
@@ -71,9 +76,7 @@ module ResearchMetadataAnnouncement
         composition.each do |component|
           case component
             when :new
-              resource = self.class.name.sub('ResearchMetadataAnnouncement::Transformer::', '')
-              phrase = "New #{resource.downcase}"
-              buffer << phrase
+              buffer << new_phrase(@resource)
             when :title
               buffer << title
             when :keywords
@@ -100,6 +103,42 @@ module ResearchMetadataAnnouncement
       end
 
       private
+
+      def handle_resolver(uri)
+        return unless uri
+        resolver = 'dx.doi.org'
+        if uri.include? resolver
+          uri
+        else
+          File.join resolver, uri
+        end
+      end
+
+      def remove_full_stop(str)
+        arr = str.split('')
+        if arr.pop == '.' && arr.pop != '.'
+          return str.chomp('.')
+        else
+          return str
+        end
+      end
+
+      def new_phrase(resource)
+        part_1 = 'New'
+        part_2 = ''
+
+        case resource.class.to_s
+          when 'Puree::Model::Dataset'
+            part_2 = 'dataset'
+          when 'Puree::Model::Publication'
+            part_2 = resource.type.downcase
+        end
+        if part_2.empty?
+          return part_1
+        else
+          return "#{part_1} #{part_2}"
+        end
+      end
 
       # Extract metadata from Pure
       #

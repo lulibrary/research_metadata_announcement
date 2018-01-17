@@ -5,6 +5,7 @@ Minitest::Reporters.use!
 lib = File.expand_path('../../lib', __FILE__)
 $LOAD_PATH.unshift(lib)
 
+gem 'research_metadata_announcement', '~>0.4.0'
 require 'research_metadata_announcement'
 
 def config
