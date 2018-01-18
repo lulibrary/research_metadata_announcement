@@ -12,7 +12,7 @@ class TestTransformationDataset < Minitest::Test
     transformer = ResearchMetadataAnnouncement::Transformer::Dataset.new config
     announcement = transformer.transform id: id, composition: [:new, :title, :uri]
 
-    assert_equal 'New dataset. Operating Nanobeams in a Quantum Fluid. dx.doi.org/10.17635/lancaster/researchdata/139.', announcement
+    assert_equal 'New dataset. Operating Nanobeams in a Quantum Fluid. doi.org/10.17635/lancaster/researchdata/139.', announcement
   end
 
   def test_dataset_2
@@ -25,7 +25,7 @@ class TestTransformationDataset < Minitest::Test
     transformer = ResearchMetadataAnnouncement::Transformer::Dataset.new config
     announcement = transformer.transform id: id, composition: [:uri, :title]
 
-    assert_equal 'dx.doi.org/10.17635/lancaster/researchdata/29. Herpes simplex virus 1 (HSV-1) evolution.', announcement
+    assert_equal 'doi.org/10.17635/lancaster/researchdata/29. Herpes simplex virus 1 (HSV-1) evolution.', announcement
   end
 
   def test_dataset_3
@@ -38,7 +38,7 @@ class TestTransformationDataset < Minitest::Test
     transformer = ResearchMetadataAnnouncement::Transformer::Dataset.new config
     announcement = transformer.transform id: id, composition: [:keywords, :uri]
 
-    assert_equal 'smart cities, sustainability. dx.doi.org/10.17635/lancaster/researchdata/35.', announcement
+    assert_equal 'smart cities, sustainability. doi.org/10.17635/lancaster/researchdata/35.', announcement
   end
 
   def test_dataset_4
@@ -51,7 +51,7 @@ class TestTransformationDataset < Minitest::Test
     transformer = ResearchMetadataAnnouncement::Transformer::Dataset.new config
     announcement = transformer.transform id: id, composition: [:hashtags, :uri]
 
-    assert_equal '#treatedhypertension #microvascularbloodflow. dx.doi.org/10.17635/lancaster/researchdata/148.', announcement
+    assert_equal '#treatedhypertension #microvascularbloodflow. doi.org/10.17635/lancaster/researchdata/148.', announcement
   end
 
   def test_dataset_5
@@ -64,7 +64,7 @@ class TestTransformationDataset < Minitest::Test
     transformer = ResearchMetadataAnnouncement::Transformer::Dataset.new config
     announcement = transformer.transform id: id, composition: [:uri, :keywords]
 
-    assert_equal 'dx.doi.org/10.17635/lancaster/researchdata/134. metagenomics, deep sequencing.', announcement
+    assert_equal 'doi.org/10.17635/lancaster/researchdata/134. metagenomics, deep sequencing.', announcement
   end
 
   def test_dataset_6
@@ -77,7 +77,7 @@ class TestTransformationDataset < Minitest::Test
     transformer = ResearchMetadataAnnouncement::Transformer::Dataset.new config
     announcement = transformer.transform id: id, composition: [:uri, :hashtags], max_descriptors: 4
 
-    assert_equal 'dx.doi.org/10.17635/lancaster/researchdata/111. #influenza #nasopharynx #virology #virus.', announcement
+    assert_equal 'doi.org/10.17635/lancaster/researchdata/111. #influenza #nasopharynx #virology #virus.', announcement
   end
 
 end
