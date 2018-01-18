@@ -106,7 +106,7 @@ module ResearchMetadataAnnouncement
 
       def handle_resolver(uri)
         return unless uri
-        resolver = 'dx.doi.org'
+        resolver = 'doi.org'
         if uri.include? resolver
           uri
         else
