@@ -138,7 +138,7 @@ module ResearchMetadataAnnouncement
       def prepare_uri
         uri = strip_uri_scheme @resource.doi if @resource && @resource.doi
         return unless uri
-        resolver = 'dx.doi.org'
+        resolver = 'doi.org'
         if uri.include? resolver
           uri
         else
