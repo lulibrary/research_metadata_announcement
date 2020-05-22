@@ -2,15 +2,15 @@ module ResearchMetadataAnnouncement
 
   module Transformer
 
-    # Extracts dataset metadata from the Pure Research Information System and
+    # Extracts research output metadata from the Pure Research Information System and
     # converts it into an announcement
     #
-    class Dataset < ResearchMetadataAnnouncement::Transformer::Base
+    class ResearchOutput < ResearchMetadataAnnouncement::Transformer::Base
 
       # @option (see ResearchMetadataAnnouncement::Transformer::Base::Resource#initialize)
       def initialize(config)
         super
-        make_extractor :dataset
+        make_extractor :research_output
       end
 
     end
